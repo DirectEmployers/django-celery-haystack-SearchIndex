@@ -1,31 +1,31 @@
 from django.db.models.loading import get_model
 
-from haystack import site
+from haystack import connections
 from haystack.management.commands import update_index
+from haystack.utils import get_identifier
 
 from celery.task import Task, PeriodicTask
 from celery.task import task
 from celery.task.schedules import crontab
 
 @task(default_retry_delay=5*60, max_retries=1, name='search.index.update')
-def search_index_update(app_name, model_name, pk, **kwargs):
+def search_index_update(instance, **kwargs):
     logger = search_index_update.get_logger(**kwargs)
     try:
-        model_class = get_model(app_name, model_name)
-        instance = model_class.objects.get(pk=pk)
-        search_index = site.get_index(model_class)
+        search_index = (connections['default'].get_unified_index\
+                                             .get_index(instance.__class__))
         search_index.update_object(instance)
     except Exception, exc:
         logger.error(exc)
         search_index_update.retry(exc=exc)
 
 @task(default_retry_delay=5*60, max_retries=1, name='search.index.delete')
-def search_index_delete(app_name, model_name, obj_identifier, **kwargs):
+def search_index_delete(instance, **kwargs):
     logger = search_index_delete.get_logger(**kwargs)
     try:
-        model_class = get_model(app_name, model_name)
-        search_index = site.get_index(model_class)
-        search_index.remove_object(obj_identifier)
+        search_index = (connections['default'].get_unified_index\
+                                             .get_index(instance.__class__))
+        search_index.remove_object(get_identifier(instance))
     except Exception, exc:
         logger.error(exc)
         search_index_delete.retry(exc=exc)

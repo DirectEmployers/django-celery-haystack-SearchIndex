@@ -3,7 +3,7 @@ from django.db.models import signals
 from haystack import indexes
 from haystack.utils import get_identifier
 
-from tasks import search_index_update, search_index_delete
+from index_tasks import search_index_update, search_index_delete
 
 
 class QueuedSearchIndex(indexes.SearchIndex):

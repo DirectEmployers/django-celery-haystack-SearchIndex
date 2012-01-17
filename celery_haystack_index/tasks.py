@@ -12,8 +12,8 @@ from celery.task.schedules import crontab
 def search_index_update(instance, **kwargs):
     logger = search_index_update.get_logger(**kwargs)
     try:
-        search_index = (connections['default'].get_unified_index\
-                                             .get_index(instance.__class__))
+        search_index = (connections['default'].get_unified_index()\
+                                              .get_index(instance.__class__))
         search_index.update_object(instance)
     except Exception, exc:
         logger.error(exc)
@@ -23,8 +23,8 @@ def search_index_update(instance, **kwargs):
 def search_index_delete(instance, **kwargs):
     logger = search_index_delete.get_logger(**kwargs)
     try:
-        search_index = (connections['default'].get_unified_index\
-                                             .get_index(instance.__class__))
+        search_index = (connections['default'].get_unified_index()\
+                                              .get_index(instance.__class__))
         search_index.remove_object(get_identifier(instance))
     except Exception, exc:
         logger.error(exc)

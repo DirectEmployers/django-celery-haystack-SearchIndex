@@ -8,7 +8,7 @@ from celery.task import Task, PeriodicTask
 from celery.task import task
 from celery.task.schedules import crontab
 
-@task(default_retry_delay=5*60, max_retries=1, name='search.index.update')
+@task(default_retry_delay=5*60, max_retries=1)
 def search_index_update(instance, **kwargs):
     logger = search_index_update.get_logger(**kwargs)
     try:
@@ -19,7 +19,7 @@ def search_index_update(instance, **kwargs):
         logger.error(exc)
         search_index_update.retry(exc=exc)
 
-@task(default_retry_delay=5*60, max_retries=1, name='search.index.delete')
+@task(default_retry_delay=5*60, max_retries=1)
 def search_index_delete(instance, **kwargs):
     logger = search_index_delete.get_logger(**kwargs)
     try:

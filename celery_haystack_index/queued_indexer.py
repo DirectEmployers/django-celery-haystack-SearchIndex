@@ -16,12 +16,14 @@ class QueuedSearchIndex(indexes.SearchIndex):
 
     def _setup_save(self):
         signals.post_save.connect(
-            self.enqueue_save, sender=self.get_model(),
+            self.enqueue_save, 
+            sender=self.get_model(),
             dispatch_uid=self.assemble_dispatch_uid(self._setup_save))
 
     def _setup_delete(self):
         signals.post_delete.connect(
-            self.enqueue_delete, sender=self.get_model(),
+            self.enqueue_delete, 
+            sender=self.get_model(),
             dispatch_uid=self.assemble_dispatch_uid(self._setup_delete))
 
     def _teardown_save(self):

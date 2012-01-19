@@ -30,6 +30,27 @@ def search_index_delete(instance, **kwargs):
         logger.error(exc)
         search_index_delete.retry(exc=exc)
 
+@task(default_retry_delay=5*60, max_retries=1)
+def search_index_bulk_update(update_items, **kwargs):
+    logger = search_index_bulk_update.get_logger(**kwargs)
+    try:
+        search_index = (connections['default'].get_unified_index()\
+                                              .get_index(instance.__class__))
+        search_index.update_objects(update_items)
+    except Exception, exc:
+        logger.error(exc)
+        search_index_bulk_update.retry(exc=exc)
+
+@task(default_retry_delay=5*60, max_retries=1)
+def search_index_bulk_delete(delete_query, **kwargs):
+    logger = search_index_bulk_delete.get_logger(**kwargs)
+    try:
+        search_index = (connections['default'].get_unified_index()\
+                                              .get_index(instance.__class__))
+        search_index.remove_objects(delete_query)
+    except Exception, exc:
+        logger.error(exc)
+        search_index_bulk_delete.retry(exc=exc)
 
 class SearchIndexUpdatePeriodicTask(PeriodicTask):
     routing_key = 'periodic.search.update_index'

@@ -1,9 +1,10 @@
 from django.db.models import signals
+from celery_haystack_index.signals import solr_bulk_change
 
 from haystack import indexes
 from haystack.utils import get_identifier
 
-from index_tasks import search_index_update, search_index_delete
+from celery_haystack_index.index_tasks import search_index_update, search_index_delete
 
 
 class QueuedSearchIndex(indexes.SearchIndex):
@@ -38,3 +39,25 @@ class QueuedSearchIndex(indexes.SearchIndex):
 
     def enqueue_delete(self, instance, **kwargs):
         search_index_delete.delay(instance)
+
+class BulkQueuedSearchIndex(indexes.SearchIndex):
+    """A ``SearchIndex`` subclass that enqueues updates for later processing."""
+    # We override the built-in _setup_* methods to connect the enqueuing
+    # operation.
+
+    def assemble_dispatch_uid(self, method):
+        return '.'.join([self.__module__, self.__class__.__name__,
+                        method.__func__.__name__])
+
+    def _setup_bulk_change(self):
+        solr_bulk_change.connect(
+            self.enqueue_bulk_change, 
+            dispatch_uid=self.assemble_dispatch_uid(self._setup_save))
+
+    def _teardown_bulk_change(self):
+        solr_bulk_change.disconnect(self.enqueue_bulk_change)
+
+    def enqueue_bulk_change(self, update_items, delete_query, **kwargs):
+        search_index_bulk_update.delay(update_items)
+        search_index_bulk_delete.delay(delete_query)
+

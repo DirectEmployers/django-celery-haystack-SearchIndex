@@ -57,7 +57,9 @@ class BulkQueuedSearchIndex(indexes.SearchIndex):
     def _teardown_bulk_change(self):
         solr_bulk_change.disconnect(self.enqueue_bulk_change)
 
-    def enqueue_bulk_change(self, update_items, delete_query, **kwargs):
-        search_index_bulk_update.delay(update_items)
-        search_index_bulk_delete.delay(delete_query)
+    def enqueue_bulk_change(self, update_items=None, delete_query=None, **kwargs):
+        if update_items:
+            search_index_bulk_update.delay(update_items)
+        if delete_query:
+            search_index_bulk_delete.delay(delete_query)
 

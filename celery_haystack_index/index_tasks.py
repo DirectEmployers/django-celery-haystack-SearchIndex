@@ -31,22 +31,20 @@ def search_index_delete(instance, **kwargs):
         search_index_delete.retry(exc=exc)
 
 @task(default_retry_delay=5*60, max_retries=1)
-def search_index_bulk_update(update_items, **kwargs):
+def search_index_bulk_update(update_items, index, **kwargs):
     logger = search_index_bulk_update.get_logger(**kwargs)
     try:
-        search_index = (connections['default'].get_unified_index()\
-                                              .get_index(instance.__class__))
+        search_index = index
         search_index.update_objects(update_items)
     except Exception, exc:
         logger.error(exc)
         search_index_bulk_update.retry(exc=exc)
 
 @task(default_retry_delay=5*60, max_retries=1)
-def search_index_bulk_delete(delete_query, **kwargs):
+def search_index_bulk_delete(delete_query, index, **kwargs):
     logger = search_index_bulk_delete.get_logger(**kwargs)
     try:
-        search_index = (connections['default'].get_unified_index()\
-                                              .get_index(instance.__class__))
+        search_index = index
         search_index.remove_objects(delete_query)
     except Exception, exc:
         logger.error(exc)

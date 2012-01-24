@@ -60,7 +60,7 @@ class BulkQueuedSearchIndex(indexes.SearchIndex):
 
     def enqueue_bulk_change(self, update_items=None, delete_query=None, **kwargs):
         if update_items:
-            search_index_bulk_update.delay(update_items)
+            search_index_bulk_update.delay(update_items, self)
         if delete_query:
-            search_index_bulk_delete.delay(delete_query)
+            search_index_bulk_delete.delay(delete_query, self)
 

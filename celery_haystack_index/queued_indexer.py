@@ -49,12 +49,12 @@ class BulkQueuedSearchIndex(indexes.SearchIndex):
         return '.'.join([self.__module__, self.__class__.__name__,
                         method.__func__.__name__])
 
-    def _setup_bulk_change(self):
+    def _setup_save(self):
         solr_bulk_change.connect(
             self.enqueue_bulk_change, 
             dispatch_uid=self.assemble_dispatch_uid(self._setup_save))
 
-    def _teardown_bulk_change(self):
+    def _teardown_save(self):
         solr_bulk_change.disconnect(self.enqueue_bulk_change)
 
     def enqueue_bulk_change(self, update_items=None, delete_query=None, **kwargs):

@@ -59,8 +59,6 @@ class BulkQueuedSearchIndex(indexes.SearchIndex):
         solr_bulk_change.disconnect(self.enqueue_bulk_change)
 
     def enqueue_bulk_change(self, update_items=None, delete_query=None, **kwargs):
-        if isinstance(update_items, long):
-            update_items = jobListing.objects.filter(buid__id=update_items)
         if update_items:
             search_index_bulk_update.delay(update_items, self)
         if delete_query:

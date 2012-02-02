@@ -64,3 +64,38 @@ class BulkQueuedSearchIndex(indexes.SearchIndex):
         if delete_query:
             search_index_bulk_delete.delay(delete_query, self)
 
+    def update_objects(self, items_to_update, using=None):
+        """
+        Updates a subset of items in the index..
+
+        If ``using`` is provided, it specifies which connection should be
+        used. Default relies on the routers to decide which backend should
+        be used.
+        """
+        self._get_backend(using).update(self, items_to_update)
+
+    def remove_objects(self, query, using=None, **kwargs):
+        """
+        Remove objects matching a particular query from the index. Attached
+        to the class's post-delete hook.
+
+        If ``using`` is provided, it specifies which connection should be
+        used. Default relies on the routers to decide which backend should
+        be used.
+        """
+        self._get_backend(using).bulk_remove(query)
+
+
+class BulkSolrSearchBackend(SolrSearchBackend):
+   def bulk_remove(self, query, commit=True):
+        try:
+            kwargs = {
+                'commit': commit,
+                'q': query
+            }
+            self.conn.delete(**kwargs)
+        except (IOError, SolrError), e:
+            if not self.silently_fail:
+                raise
+                
+            self.log.error("Failed to remove documents matching query '%s' from Solr: %s", query, e) 

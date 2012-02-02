@@ -3,6 +3,7 @@ from celery_haystack_index.signals import solr_bulk_change
 
 from haystack import indexes
 from haystack.utils import get_identifier
+from haystack.backends.solr_backend import SolrSearchBackend
 
 from celery_haystack_index.index_tasks import (search_index_update,
 search_index_delete, search_index_bulk_update, search_index_bulk_delete)

@@ -1,5 +1,6 @@
 from django.db.models import signals
 from celery_haystack_index.signals import solr_bulk_change
+from pysolr import SolrError
 
 from haystack import indexes
 from haystack.utils import get_identifier

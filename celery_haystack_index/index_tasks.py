@@ -6,7 +6,7 @@ from haystack.utils import get_identifier
 
 from celery.task import Task, PeriodicTask
 from celery.task import task
-from celery.task.schedules import crontab
+from celery.schedules import crontab
 
 @task(default_retry_delay=5*60, max_retries=1)
 def search_index_update(instance, **kwargs):
